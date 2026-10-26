@@ -23,7 +23,7 @@
     deviceName: detectDesktopName(),
     deviceType: 'DESKTOP',
     relayUrl: 'ws://localhost:8787',
-    pwaUrl: 'https://raw.githack.com/zhenxxx7/ytm-connect/main/docs/index.html',
+    pwaUrl: 'https://ytm-connect.vercel.app',
     connected: false,
     activeDeviceId: null,
     devices: [],
@@ -169,7 +169,7 @@
       deviceId: `desktop-${randomAlphanumeric(8).toLowerCase()}`,
       deviceName: detectDesktopName(),
       relayUrl: 'ws://localhost:8787',
-      pwaUrl: 'https://raw.githack.com/zhenxxx7/ytm-connect/main/docs/index.html'
+      pwaUrl: 'https://ytm-connect.vercel.app'
     };
 
     try {

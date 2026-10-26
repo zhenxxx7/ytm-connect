@@ -32,7 +32,7 @@
     pairToken: 'PAIR2026',
     deviceId: '',
     relayUrl: 'ws://localhost:8787',
-    pwaUrl: 'https://raw.githack.com/zhenxxx7/ytm-connect/main/docs/index.html',
+    pwaUrl: 'https://ytm-connect.vercel.app',
     connected: false,
     activeDeviceId: null,
     devices: [],
@@ -55,7 +55,7 @@
       pairToken: randomCode(8),
       deviceId: `desktop-${randomCode(8).toLowerCase()}`,
       relayUrl: 'ws://localhost:8787',
-      pwaUrl: 'https://raw.githack.com/zhenxxx7/ytm-connect/main/docs/index.html'
+      pwaUrl: 'https://ytm-connect.vercel.app'
     };
 
     if (extApi && extApi.storage && extApi.storage.local) {
@@ -196,7 +196,7 @@
     const pairingUrl = getMobilePairingUrl();
     ui.openPwaLink.href = pairingUrl;
     const rawBase = (
-      state.pwaUrl || 'https://raw.githack.com/zhenxxx7/ytm-connect/main/docs/index.html'
+      state.pwaUrl || 'https://ytm-connect.vercel.app'
     ).replace(/\/+$/, '');
     const sep = rawBase.endsWith('.html') ? '?' : '/?';
     const qrTargetUrl = `${rawBase}${sep}room=${encodeURIComponent(
