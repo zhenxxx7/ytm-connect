@@ -14,7 +14,6 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
-const { WebSocketServer, WebSocket } = require('ws');
 
 const DEFAULT_PWA_PORT = Number(process.env.PWA_PORT || process.env.PORT || 3000);
 const DEFAULT_RELAY_PORT = Number(process.env.RELAY_PORT || 8787);
@@ -294,6 +293,7 @@ function buildStandaloneProxiedDocument(initialSearch = '') {
 }
 
 function createMobilePwaServer(options = {}) {
+  const { WebSocketServer, WebSocket } = require('ws');
   const port = options.port ?? DEFAULT_PWA_PORT;
   const relayPort = options.relayPort ?? DEFAULT_RELAY_PORT;
   const publicDir = path.join(__dirname, '..', 'public');

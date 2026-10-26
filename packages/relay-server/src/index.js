@@ -6,7 +6,6 @@
 const http = require('http');
 const os = require('os');
 const { URL } = require('url');
-const { WebSocketServer, WebSocket } = require('ws');
 
 const DEFAULT_PORT = Number(process.env.RELAY_PORT || process.env.PORT || 8787);
 const PWA_PORT = Number(process.env.PWA_PORT || 3000);
@@ -58,7 +57,7 @@ function normalizeRoomId(roomId) {
 }
 
 function sendJson(ws, message) {
-  if (ws && ws.readyState === WebSocket.OPEN) {
+  if (ws && ws.readyState === 1) {
     try {
       ws.send(JSON.stringify(message));
     } catch (err) {
@@ -68,6 +67,7 @@ function sendJson(ws, message) {
 }
 
 function createRelayServer(options = {}) {
+  const { WebSocketServer, WebSocket } = require('ws');
   const port = options.port ?? DEFAULT_PORT;
   const heartbeatIntervalMs = options.heartbeatIntervalMs ?? HEARTBEAT_INTERVAL_MS;
 
