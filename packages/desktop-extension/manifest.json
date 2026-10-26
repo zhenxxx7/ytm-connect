@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "YTM-Connect for YouTube Music",
   "short_name": "YTM-Connect",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Real-time multi-device remote control and seamless playback handoff for YouTube Music between Desktop and Mobile.",
   "permissions": [
     "storage",

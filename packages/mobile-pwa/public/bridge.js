@@ -242,6 +242,69 @@
     };
   }
 
+  function sendYoutubeIframeCommand(func, args = []) {
+    try {
+      const wrap = document.getElementById('ytmc-yt-embed-wrap');
+      const iframe = wrap ? wrap.querySelector('iframe') : null;
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+          JSON.stringify({ event: 'command', func, args }),
+          '*'
+        );
+      }
+    } catch {}
+  }
+
+  function stopMobileLocalPlayback() {
+    state.track.isPaused = true;
+    stopLocalPlaybackClock();
+    const video = document.querySelector('video');
+    if (video && !video.paused) {
+      try {
+        video.pause();
+      } catch {}
+    }
+    sendYoutubeIframeCommand('pauseVideo');
+    sendYoutubeIframeCommand('stopVideo');
+    const wrap = document.getElementById('ytmc-yt-embed-wrap');
+    if (wrap) {
+      wrap.replaceChildren();
+      wrap.style.display = 'none';
+    }
+    window.dispatchEvent(new CustomEvent('ytm-connect:mobile-handoff-stopped'));
+  }
+
+  function stepLocalQueue(direction) {
+    const q = Array.isArray(state.track.queue) ? state.track.queue : [];
+    if (q.length > 0) {
+      let curIdx = q.findIndex(
+        (item) =>
+          (state.track.videoId && item.videoId === state.track.videoId) ||
+          (state.track.title && item.title === state.track.title) ||
+          item.selected
+      );
+      if (curIdx === -1) curIdx = 0;
+      const nextIdx = (curIdx + direction + q.length) % q.length;
+      const target = q[nextIdx];
+      if (target && (target.videoId || target.title)) {
+        q.forEach((it, idx) => {
+          it.selected = idx === nextIdx;
+        });
+        loadAndPlayOnMobile({
+          videoId: target.videoId || state.track.videoId,
+          listId: state.track.listId || '',
+          currentTime: 0,
+          title: target.title,
+          artist: target.artist,
+          artwork: target.artwork,
+          autoPlay: true
+        });
+        return true;
+      }
+    }
+    return false;
+  }
+
   function executeLocalMobileAction(payload = {}) {
     const action = String(payload.action || '').toUpperCase();
     const video = getOrCreateLocalVideo();
@@ -253,6 +316,7 @@
         case 'PLAY': {
           state.track.isPaused = false;
           if (hasSrc) video.play().catch(() => {});
+          sendYoutubeIframeCommand('playVideo');
           startLocalPlaybackClock();
           emitMobileStateUpdate(true);
           renderUI();
@@ -261,31 +325,37 @@
         case 'PAUSE': {
           state.track.isPaused = true;
           if (hasSrc && !video.paused) video.pause();
+          sendYoutubeIframeCommand('pauseVideo');
           stopLocalPlaybackClock();
           emitMobileStateUpdate(true);
           renderUI();
           break;
         }
         case 'NEXT': {
-          const nextBtn = document.querySelector('.next-button');
-          if (nextBtn) nextBtn.click();
-          state.track.currentTime = 0;
-          emitMobileStateUpdate(true);
-          renderUI();
+          if (!stepLocalQueue(1)) {
+            const nextBtn = document.querySelector('.next-button');
+            if (nextBtn) nextBtn.click();
+            state.track.currentTime = 0;
+            emitMobileStateUpdate(true);
+            renderUI();
+          }
           break;
         }
         case 'PREV': {
-          const prevBtn = document.querySelector('.previous-button');
-          if (prevBtn) prevBtn.click();
-          state.track.currentTime = 0;
-          emitMobileStateUpdate(true);
-          renderUI();
+          if (!stepLocalQueue(-1)) {
+            const prevBtn = document.querySelector('.previous-button');
+            if (prevBtn) prevBtn.click();
+            state.track.currentTime = 0;
+            emitMobileStateUpdate(true);
+            renderUI();
+          }
           break;
         }
         case 'SEEK': {
           const t = Math.max(0, Number(payload.value ?? payload.time ?? 0));
           state.track.currentTime = t;
           if (hasSrc) video.currentTime = t;
+          sendYoutubeIframeCommand('seekTo', [t, true]);
           emitMobileStateUpdate(true);
           renderUI();
           break;
@@ -297,6 +367,7 @@
             video.muted = vol === 0;
             video.volume = vol / 100;
           }
+          sendYoutubeIframeCommand('setVolume', [vol]);
           emitMobileStateUpdate(true);
           renderUI();
           break;
@@ -460,15 +531,18 @@
     }
 
     const fromDeviceId = state.activeDeviceId || state.deviceId;
+    const currentSnapshot = isThisMobileActive()
+      ? { ...state.track, ...readMobileLocalState() }
+      : state.track;
 
     if (fromDeviceId === state.deviceId && targetDeviceId !== state.deviceId) {
-      state.track.isPaused = true;
-      stopLocalPlaybackClock();
-      const video = document.querySelector('video');
-      if (video && !video.paused) video.pause();
+      stopMobileLocalPlayback();
+      state.activeDeviceId = targetDeviceId;
+      state.devices.forEach((d) => {
+        d.isActivePlayer = d.deviceId === targetDeviceId;
+      });
+      renderUI();
     }
-
-    const currentSnapshot = isThisMobileActive() ? readMobileLocalState() : state.track;
 
     sendWsEvent(
       'HANDOFF_PLAYBACK',
@@ -483,6 +557,10 @@
         currentTime: Number(currentSnapshot.currentTime || 0),
         duration: Number(currentSnapshot.duration || 0),
         volume: Number(currentSnapshot.volume ?? 100),
+        queue: currentSnapshot.queue || state.track.queue || [],
+        prevTrack: currentSnapshot.prevTrack || state.track.prevTrack || null,
+        nextTrack: currentSnapshot.nextTrack || state.track.nextTrack || null,
+        lyrics: currentSnapshot.lyrics || state.track.lyrics || '',
         autoPlay: true,
         confirmed: fromDeviceId === state.deviceId
       },
@@ -674,7 +752,7 @@
         state.activeDeviceId = payload.activeDeviceId || state.activeDeviceId;
         ensureSelfInDevices();
         if (!isThisMobileActive()) {
-          stopLocalPlaybackClock();
+          stopMobileLocalPlayback();
         }
         renderUI();
         break;
@@ -685,7 +763,7 @@
           if (!state.devices.some((d) => d.deviceId === senderId)) {
             state.devices.push({
               deviceId: senderId,
-              deviceName: 'Desktop Chrome',
+              deviceName: 'Desktop Browser',
               deviceType: 'DESKTOP',
               isActivePlayer: true
             });
@@ -697,6 +775,11 @@
           state.track = {
             ...state.track,
             ...payload,
+            queue:
+              Array.isArray(payload.queue) && payload.queue.length > 0
+                ? payload.queue
+                : state.track.queue || [],
+            lyrics: payload.lyrics || state.track.lyrics || '',
             artwork:
               payload.artwork ||
               payload.albumArtUrl ||
@@ -718,12 +801,8 @@
 
       case 'HANDOFF_PLAYBACK': {
         if (payload.phase === 'PAUSE_SOURCE' && payload.fromDeviceId === state.deviceId) {
-          state.track.isPaused = true;
-          stopLocalPlaybackClock();
-          const video = document.querySelector('video');
-          if (video && !video.paused) video.pause();
-
-          const finalState = readMobileLocalState();
+          const finalState = { ...state.track, ...readMobileLocalState() };
+          stopMobileLocalPlayback();
           state.activeDeviceId = payload.toDeviceId;
           sendWsEvent(
             'HANDOFF_PLAYBACK',
@@ -738,6 +817,10 @@
               currentTime: finalState.currentTime,
               duration: finalState.duration,
               volume: finalState.volume,
+              queue: finalState.queue || [],
+              prevTrack: finalState.prevTrack || null,
+              nextTrack: finalState.nextTrack || null,
+              lyrics: finalState.lyrics || '',
               autoPlay: payload.autoPlay ?? true,
               confirmed: true
             },
@@ -749,10 +832,19 @@
           state.devices.forEach((d) => {
             d.isActivePlayer = d.deviceId === state.deviceId;
           });
+          if (Array.isArray(payload.queue) && payload.queue.length > 0) {
+            state.track.queue = payload.queue;
+          }
+          if (payload.lyrics) {
+            state.track.lyrics = payload.lyrics;
+          }
           loadAndPlayOnMobile(payload);
-        } else if (payload.confirmed && payload.toDeviceId) {
+        } else if (payload.confirmed && payload.toDeviceId && payload.toDeviceId !== state.deviceId) {
+          stopMobileLocalPlayback();
           state.activeDeviceId = payload.toDeviceId;
-          stopLocalPlaybackClock();
+          state.devices.forEach((d) => {
+            d.isActivePlayer = d.deviceId === payload.toDeviceId;
+          });
           renderUI();
         }
         break;

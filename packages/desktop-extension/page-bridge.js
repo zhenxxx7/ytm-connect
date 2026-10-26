@@ -1,7 +1,7 @@
 /**
  * YTM-Connect — Page World Bridge (Injected into MAIN world of music.youtube.com)
- * Provides direct access to YouTube Music's internal #movie_player API for
- * exact videoId/listId extraction and zero-reload LOAD_AND_PLAY handoff.
+ * Provides direct access to YouTube Music's internal #movie_player API and Polymer Queue
+ * for exact videoId/listId/queue extraction and zero-reload LOAD_AND_PLAY handoff.
  */
 (function () {
   if (window.__YTM_CONNECT_PAGE_BRIDGE__) return;
@@ -9,6 +9,78 @@
 
   function getMoviePlayer() {
     return document.getElementById('movie_player') || document.querySelector('.html5-video-player');
+  }
+
+  function extractPlaylistIdsFromPlayer(player) {
+    try {
+      if (player && typeof player.getPlaylist === 'function') {
+        const list = player.getPlaylist();
+        if (Array.isArray(list)) return list;
+      }
+    } catch {}
+    return [];
+  }
+
+  function extractQueueItemsFromPolymer(playlistIds = []) {
+    const items = [];
+    try {
+      const domItems = document.querySelectorAll('ytmusic-player-queue#queue ytmusic-player-queue-item');
+      const nodeList =
+        domItems && domItems.length > 0
+          ? domItems
+          : document.querySelectorAll('ytmusic-player-queue-item');
+
+      nodeList.forEach((el, idx) => {
+        if (idx >= 30) return;
+        const data = el.data || el.__data?.data || el.item || {};
+        let videoId =
+          data.videoId ||
+          data.navigationEndpoint?.watchEndpoint?.videoId ||
+          playlistIds[idx] ||
+          '';
+
+        const titleEl = el.querySelector('.song-title');
+        const bylineEl = el.querySelector('.byline');
+        const durationEl = el.querySelector('.duration');
+        const imgEl = el.querySelector('img');
+
+        const title = (titleEl && titleEl.textContent ? titleEl.textContent.trim() : '') ||
+          data?.title?.runs?.[0]?.text ||
+          '';
+        const artist = (bylineEl && bylineEl.textContent ? bylineEl.textContent.trim() : '') ||
+          data?.longBylineText?.runs?.[0]?.text ||
+          '';
+        const durationText =
+          (durationEl && durationEl.textContent ? durationEl.textContent.trim() : '') ||
+          data?.lengthText?.runs?.[0]?.text ||
+          '';
+        let artwork = (imgEl && imgEl.src ? imgEl.src : '') ||
+          data?.thumbnail?.thumbnails?.[0]?.url ||
+          '';
+        if ((!artwork || artwork.startsWith('data:')) && videoId) {
+          artwork = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+        }
+
+        const selected =
+          el.hasAttribute('selected') ||
+          el.getAttribute('play-button-state') === 'playing' ||
+          el.getAttribute('play-button-state') === 'paused' ||
+          Boolean(data.selected);
+
+        if (title) {
+          items.push({
+            index: idx,
+            videoId,
+            title,
+            artist,
+            durationText,
+            artwork,
+            selected
+          });
+        }
+      });
+    } catch {}
+    return items;
   }
 
   function extractInternalPlayerMeta() {
@@ -19,8 +91,12 @@
       title: '',
       artist: '',
       currentTime: null,
-      duration: null
+      duration: null,
+      playlistIndex: -1,
+      queue: []
     };
+
+    let playlistIds = [];
 
     try {
       if (player) {
@@ -35,6 +111,11 @@
         if (typeof player.getPlaylistId === 'function') {
           result.listId = player.getPlaylistId() || '';
         }
+        if (typeof player.getPlaylistIndex === 'function') {
+          result.playlistIndex = Number(player.getPlaylistIndex());
+        }
+        playlistIds = extractPlaylistIdsFromPlayer(player);
+
         if (typeof player.getVideoUrl === 'function' && (!result.videoId || !result.listId)) {
           const videoUrl = player.getVideoUrl();
           if (videoUrl) {
@@ -54,7 +135,6 @@
       // ignore internal player read errors
     }
 
-    // Fallback: inspect ytmusic-player-bar Polymer properties if available
     try {
       const playerBar = document.querySelector('ytmusic-player-bar');
       if (playerBar) {
@@ -66,10 +146,9 @@
           result.videoId = currentItem.videoId;
         }
       }
-    } catch {
-      // ignore
-    }
+    } catch {}
 
+    result.queue = extractQueueItemsFromPolymer(playlistIds);
     return result;
   }
 
@@ -98,6 +177,7 @@
           if (player && typeof player.playVideo === 'function') {
             player.playVideo();
           }
+          setTimeout(broadcastMeta, 120);
           break;
         }
 
@@ -105,6 +185,7 @@
           if (player && typeof player.pauseVideo === 'function') {
             player.pauseVideo();
           }
+          setTimeout(broadcastMeta, 120);
           break;
         }
 
@@ -112,6 +193,7 @@
           if (player && typeof player.nextVideo === 'function') {
             player.nextVideo();
           }
+          setTimeout(broadcastMeta, 300);
           break;
         }
 
@@ -119,6 +201,7 @@
           if (player && typeof player.previousVideo === 'function') {
             player.previousVideo();
           }
+          setTimeout(broadcastMeta, 300);
           break;
         }
 
@@ -127,6 +210,7 @@
           if (player && typeof player.seekTo === 'function' && Number.isFinite(seconds)) {
             player.seekTo(seconds, true);
           }
+          setTimeout(broadcastMeta, 120);
           break;
         }
 
@@ -135,6 +219,28 @@
           if (player && typeof player.setVolume === 'function') {
             player.setVolume(vol);
           }
+          setTimeout(broadcastMeta, 120);
+          break;
+        }
+
+        case 'PLAY_QUEUE_INDEX': {
+          const idx = Number(payload.index ?? payload.value ?? -1);
+          if (idx >= 0) {
+            const domItems = document.querySelectorAll(
+              'ytmusic-player-queue#queue ytmusic-player-queue-item'
+            );
+            const targetItem = domItems[idx];
+            if (targetItem) {
+              const playBtn =
+                targetItem.querySelector('ytmusic-play-button-renderer') ||
+                targetItem.querySelector('#play-button') ||
+                targetItem;
+              playBtn.click();
+            } else if (player && typeof player.playVideoAt === 'function') {
+              player.playVideoAt(idx);
+            }
+          }
+          setTimeout(broadcastMeta, 350);
           break;
         }
 
@@ -162,9 +268,7 @@
                   try {
                     player.seekTo(Number(startSeconds) || 0, true);
                     player.playVideo();
-                  } catch {
-                    // ignore
-                  }
+                  } catch {}
                 }, 350);
               }
               handled = true;
@@ -176,6 +280,7 @@
               detail: { handled, videoId, listId, startSeconds }
             })
           );
+          setTimeout(broadcastMeta, 400);
           break;
         }
       }
