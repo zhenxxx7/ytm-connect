@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "YTM-Connect — Spotify Connect for YouTube Music",
   "short_name": "YTM-Connect",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Real-time multi-device remote control and seamless playback handoff for YouTube Music between Desktop and Mobile.",
   "permissions": [
     "storage",

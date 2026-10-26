@@ -421,6 +421,21 @@
     if (normalized === 'PAUSE') state.track.isPaused = true;
     if (normalized === 'SEEK' && typeof value === 'number') state.track.currentTime = value;
     if (normalized === 'VOLUME' && typeof value === 'number') state.track.volume = value;
+    if (normalized === 'LOAD_AND_PLAY' && value && typeof value === 'object') {
+      state.track = {
+        ...state.track,
+        videoId: value.videoId || state.track.videoId,
+        listId: value.listId || '',
+        title: value.title || state.track.title,
+        artist: value.artist || state.track.artist,
+        artwork:
+          value.artwork ||
+          (value.videoId ? `https://i.ytimg.com/vi/${value.videoId}/hqdefault.jpg` : state.track.artwork),
+        currentTime: Number(value.startSeconds ?? value.currentTime ?? 0),
+        duration: Number(value.duration || state.track.duration || 210),
+        isPaused: false
+      };
+    }
     renderUI();
 
     sendWsEvent(
@@ -939,7 +954,15 @@
     );
     document.body.appendChild(sheetEl);
 
-    document.getElementById('ytmc-pill-open-sheet').addEventListener('click', () => toggleSheet(true));
+    document.getElementById('ytmc-pill-open-sheet').addEventListener('click', () => {
+      const npView = document.getElementById('ytmc-now-playing-view');
+      if (npView) {
+        npView.classList.remove('minimized');
+        window.dispatchEvent(new CustomEvent('ytm-connect:open-now-playing'));
+      } else {
+        toggleSheet(true);
+      }
+    });
     document.getElementById('ytmc-pill-devices').addEventListener('click', () => toggleSheet(true));
     document.getElementById('ytmc-sheet-close').addEventListener('click', () => toggleSheet(false));
 
@@ -1147,7 +1170,29 @@
     getState: () => state,
     dispatchUserControl,
     initiateHandoff,
-    openDeviceSheet: () => toggleSheet(true)
+    openDeviceSheet: () => toggleSheet(true),
+    playTrack: (trackData) => {
+      if (!trackData || !trackData.videoId) return;
+      dispatchUserControl('LOAD_AND_PLAY', {
+        videoId: trackData.videoId,
+        listId: trackData.listId || '',
+        startSeconds: Number(trackData.startSeconds || 0),
+        title: trackData.title || 'YouTube Music Track',
+        artist: trackData.artist || 'YouTube Music',
+        artwork:
+          trackData.artwork || `https://i.ytimg.com/vi/${trackData.videoId}/hqdefault.jpg`,
+        duration: Number(trackData.duration || 210),
+        autoPlay: true
+      });
+    },
+    setRoomCode: (code) => {
+      const cleaned = String(code || '').trim().toUpperCase();
+      if (!cleaned) return;
+      state.roomId = cleaned;
+      state.pairToken = '';
+      saveConfig();
+      connectAllTransports();
+    }
   };
 
   function init() {
