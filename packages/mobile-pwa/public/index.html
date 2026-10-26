@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#030303" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>YouTube Music</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="overlay.css" />
+  <style>
+    :root {
+      --ytm-bg: #030303;
+      --ytm-surface: #0f0f0f;
+      --ytm-surface-elevated: #1c1c1c;
+      --ytm-surface-glass: rgba(24, 24, 24, 0.86);
+      --ytm-border: rgba(255, 255, 255, 0.1);
+      --ytm-red: #ff0033;
+      --ytm-green: #1ed760;
+      --ytm-text: #ffffff;
+      --ytm-subtext: #aaaaaa;
+      --ytm-muted: #717171;
+      --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background-color: var(--ytm-bg);
+      color: var(--ytm-text);
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* Dynamic Ambient Album Art Bleed (Authentic YTM Mobile Backdrop) */
+    .ytm-ambient-backdrop {
+      position: fixed;
+      top: -12%;
+      left: -15%;
+      right: -15%;
+      height: 62vh;
+      background-size: cover;
+      background-position: center;
+      filter: blur(78px) saturate(210%) brightness(0.38);
+      opacity: 0.85;
+      pointer-events: none;
+      z-index: 0;
+      transition: background-image 0.6s ease, opacity 0.4s ease;
+    }
+
+    .ytm-ambient-gradient-mask {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(3, 3, 3, 0.18) 0%, rgba(3, 3, 3, 0.85) 45%, #030303 75%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ytm-app-container {
+      position: relative;
+      z-index: 1;
+      max-width: 500px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding-bottom: 185px;
+    }
+
+    /* Top App Header */
+    .ytm-top-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px 10px;
+      background: linear-gradient(180deg, rgba(3, 3, 3, 0.92) 0%, rgba(3, 3, 3, 0.65) 85%, transparent 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .ytm-brand {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+    }
+
+    .ytm-logo-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--ytm-red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 2px 12px rgba(255, 0, 51, 0.45);
+    }
+
+    .ytm-logo-ring {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1.6px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ytm-brand-text {
+      font-family: var(--font-display);
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #fff;
+    }
+
+    .ytm-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ytm-room-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(30, 215, 96, 0.4);
+      background: rgba(30, 215, 96, 0.12);
+      color: var(--ytm-green);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+    }
+
+    .ytm-room-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ytm-green);
+      box-shadow: 0 0 8px var(--ytm-green);
+    }
+
+    .ytm-icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .ytm-icon-btn:active {
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .ytm-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff0033, #ff6b00);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-left: 2px;
+    }
+
+    /* Expandable Search Bar */
+    .ytm-search-drawer {
+      display: none;
+      padding: 6px 16px 12px;
+    }
+
+    .ytm-search-drawer.open {
+      display: block;
+    }
+
+    .ytm-search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #1d1d1d;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      padding: 8px 14px;
+    }
+
+    .ytm-search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      outline: none;
+    }
+
+    .ytm-search-input::placeholder {
+      color: var(--ytm-subtext);
+    }
+
+    /* Horizontal Mood Chips */
+    .ytm-mood-chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 6px 16px 14px;
+      scrollbar-width: none;
+    }
+
+    .ytm-mood-chips::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ytm-chip {
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .ytm-chip.active {
+      background: #ffffff;
+      color: #030303;
+      border-color: #ffffff;
+    }
+
+    /* Spotify-Connect / YTM-Connect Active Handoff Banner */
+    .ytm-connect-banner {
+      margin: 2px 16px 18px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(30, 215, 96, 0.14) 0%, rgba(18, 22, 28, 0.92) 100%);
+      border: 1px solid rgba(30, 215, 96, 0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ytm-connect-banner-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .ytm-connect-status-text {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ytm-green);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ytm-connect-banner-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .ytm-handoff-btn {
+      padding: 9px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.12s ease, background 0.15s ease;
+    }
+
+    .ytm-handoff-btn:active {
+      transform: scale(0.97);
+    }
+
+    .ytm-handoff-btn.phone {
+      border: 1px solid rgba(30, 215, 96, 0.45);
+      background: rgba(30, 215, 96, 0.18);
+      color: var(--ytm-green);
+    }
+
+    .ytm-handoff-btn.desktop {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    /* Section Headings */
+    .ytm-section {
+      margin-bottom: 24px;
+    }
+
+    .ytm-section-header {
+      padding: 0 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .ytm-section-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ytm-subtext);
+      margin-bottom: 2px;
+    }
+
+    .ytm-section-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+
+    .ytm-section-more {
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: transparent;
+      color: #fff;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Speed Dial 3x3 Grid (Signature YTM Mobile Home Layout) */
+    .ytm-speed-dial-grid {
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .ytm-dial-card {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #181818;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .ytm-dial-card:active {
+      transform: scale(0.95);
+    }
+
+    .ytm-dial-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .ytm-dial-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.86) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 7px;
+    }
+
+    .ytm-dial-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #fff;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .ytm-dial-card.playing {
+      outline: 2px solid var(--ytm-red);
+    }
+
+    /* Quick Picks Song Rows */
+    .ytm-quick-picks-list {
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ytm-song-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .ytm-song-row:hover, .ytm-song-row:active {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .ytm-song-row.playing {
+      background: rgba(255, 0, 51, 0.14);
+    }
+
+    .ytm-song-thumb-wrap {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      border-radius: 6px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #1a1a1a;
+    }
+
+    .ytm-song-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .ytm-song-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ytm-song-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ytm-song-row.playing .ytm-song-title {
+      color: #ff4d6d;
+    }
+
+    .ytm-song-sub {
+      font-size: 12px;
+      color: var(--ytm-subtext);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    .ytm-song-more {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--ytm-subtext);
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    /* Mixed For You Horizontal Carousel */
+    .ytm-carousel {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding: 0 16px 6px;
+      scrollbar-width: none;
+    }
+
+    .ytm-carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ytm-mix-card {
+      width: 146px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .ytm-mix-art-wrap {
+      position: relative;
+      width: 146px;
+      height: 146px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .ytm-mix-art-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .ytm-mix-badge {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.78);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    .ytm-mix-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ytm-mix-sub {
+      font-size: 11.5px;
+      color: var(--ytm-subtext);
+      margin-top: 2px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* FULL-SCREEN NOW PLAYING VIEW (Authentic YTM Watch Page Sheet) */
+    .ytm-now-playing-sheet {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483625;
+      background: linear-gradient(180deg, #1b0c12 0%, #09090b 48%, #030303 100%);
+      display: flex;
+      flex-direction: column;
+      padding: 12px 20px calc(74px + env(safe-area-inset-bottom, 0px));
+      overflow-y: auto;
+      transform: translateY(0%);
+      transition: transform 0.32s cubic-bezier(0.2, 0.9, 0.2, 1);
+    }
+
+    .ytm-now-playing-sheet.minimized {
+      transform: translateY(105%);
+      pointer-events: none;
+    }
+
+    .ytm-np-inner {
+      max-width: 440px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1;
+    }
+
+    .ytm-np-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 2px;
+    }
+
+    /* Song / Video Toggle Switch */
+    .ytm-song-video-toggle {
+      display: inline-flex;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      padding: 3px;
+    }
+
+    .ytm-sv-btn {
+      padding: 5px 16px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: var(--ytm-subtext);
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .ytm-sv-btn.active {
+      background: #2b2b2b;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Artwork / Video Stage */
+    .ytm-np-art-stage {
+      position: relative;
+      width: min(300px, 76vw);
+      height: min(300px, 76vw);
+      margin: 4px auto;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #141414;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.78);
+    }
+
+    .ytm-np-art-stage img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Track Title & Like Row */
+    .ytm-np-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 2px;
+    }
+
+    .ytm-np-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ytm-np-artist {
+      margin: 3px 0 0;
+      font-size: 14px;
+      color: var(--ytm-subtext);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* YTM Action Pills Strip */
+    .ytm-np-pills {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+
+    .ytm-np-pills::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ytm-action-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .ytm-action-pill.active-green {
+      background: rgba(30, 215, 96, 0.16);
+      border-color: rgba(30, 215, 96, 0.45);
+      color: var(--ytm-green);
+    }
+
+    /* Scrubber Bar */
+    .ytm-np-scrubber {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ytm-np-range {
+      width: 100%;
+      accent-color: #ffffff;
+      height: 4px;
+      cursor: pointer;
+    }
+
+    .ytm-np-times {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: var(--ytm-subtext);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Main Player Transport Controls */
+    ytmusic-player-bar.ytm-np-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 2px 6px;
+    }
+
+    .ytm-ctrl-aux {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--ytm-subtext);
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    .ytm-ctrl-step {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ytm-ctrl-play {
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      border: none;
+      background: #ffffff;
+      color: #030303;
+      font-size: 26px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(255, 255, 255, 0.25);
+      transition: transform 0.12s ease;
+    }
+
+    .ytm-ctrl-play:active {
+      transform: scale(0.93);
+    }
+
+    /* Up Next / Lyrics / Related Tabs inside Player */
+    .ytm-np-drawer-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 4px;
+    }
+
+    .ytm-np-tab-btn {
+      padding: 10px 4px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--ytm-subtext);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+    }
+
+    .ytm-np-tab-btn.active {
+      color: #fff;
+      border-bottom-color: #fff;
+    }
+
+    .ytm-np-drawer-body {
+      max-height: 170px;
+      overflow-y: auto;
+      padding: 6px 0;
+    }
+
+    /* Bottom Navigation Bar */
+    .ytm-bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: calc(58px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      background: rgba(12, 12, 14, 0.96);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 2147483635;
+    }
+
+    .ytm-nav-item {
+      flex: 1;
+      height: 100%;
+      border: none;
+      background: transparent;
+      color: var(--ytm-subtext);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 10.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .ytm-nav-item.active {
+      color: #ffffff;
+    }
+
+    .ytm-nav-item svg {
+      width: 21px;
+      height: 21px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Dynamic Ambient Artwork Glow -->
+  <div id="ytmc-ambient-glow" class="ytm-ambient-backdrop"></div>
+  <div class="ytm-ambient-gradient-mask"></div>
+
+  <!-- Main YouTube Music Browse Shell -->
+  <div id="ytmc-mobile-app-shell" class="ytm-app-container">
+    <!-- Top App Header -->
+    <header class="ytm-top-header">
+      <div class="ytm-brand" id="ytmc-brand-home">
+        <div class="ytm-logo-circle">
+          <div class="ytm-logo-ring">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="#fff"><polygon points="8,5 19,12 8,19"/></svg>
+          </div>
+        </div>
+        <span class="ytm-brand-text">Music</span>
+      </div>
+
+      <div class="ytm-header-actions">
+        <button id="ytmc-header-room-pill" type="button" class="ytm-room-pill-btn" title="Pair Room Code">
+          <span class="ytm-room-dot"></span>
+          <span id="ytmc-header-room-code">CONNECT</span>
+        </button>
+
+        <button id="ytmc-search-toggle-btn" type="button" class="ytm-icon-btn" title="Search YouTube Music">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="20" y1="20" x2="16.2" y2="16.2"></line>
+          </svg>
+        </button>
+
+        <button id="ytmc-header-connect-btn" type="button" class="ytm-icon-btn" title="Connect to a device">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1ed760" stroke-width="2.2">
+            <path d="M2 16.1A5 5 0 0 1 5.9 20M2 12.05A9 9 0 0 1 9.95 20M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"></path>
+            <line x1="2" y1="20" x2="2.01" y2="20"></line>
+          </svg>
+        </button>
+
+        <div id="ytmc-open-player-avatar" class="ytm-avatar" title="Open Full Player">♫</div>
+      </div>
+    </header>
+
+    <!-- Interactive Search Drawer -->
+    <div id="ytmc-search-drawer" class="ytm-search-drawer">
+      <div class="ytm-search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="20" y1="20" x2="16.2" y2="16.2"></line>
+        </svg>
+        <input id="ytmc-search-input" type="text" class="ytm-search-input" placeholder="Search songs, artists, or paste YouTube URL..." />
+        <button id="ytmc-search-clear" type="button" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:14px;">✕</button>
+      </div>
+    </div>
+
+    <!-- Horizontal Mood Chips -->
+    <div class="ytm-mood-chips" id="ytmc-mood-chips">
+      <button type="button" class="ytm-chip active" data-mood="All">All</button>
+      <button type="button" class="ytm-chip" data-mood="Energize">Energize</button>
+      <button type="button" class="ytm-chip" data-mood="Relax">Relax</button>
+      <button type="button" class="ytm-chip" data-mood="Workout">Workout</button>
+      <button type="button" class="ytm-chip" data-mood="Focus">Focus</button>
+      <button type="button" class="ytm-chip" data-mood="Commute">Commute</button>
+      <button type="button" class="ytm-chip" data-mood="Party">Party</button>
+      <button type="button" class="ytm-chip" data-mood="Romance">Romance</button>
+    </div>
+
+    <!-- Spotify Connect / YTM-Connect Handoff Banner -->
+    <section class="ytm-connect-banner">
+      <div class="ytm-connect-banner-top">
+        <div id="ytmc-stage-mode-pill" class="ytm-connect-status-text">
+          🟢 Connecting to Desktop YouTube Music...
+        </div>
+        <button type="button" id="ytmc-expand-np-btn" style="background:rgba(255,255,255,0.1);border:none;color:#fff;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer;">
+          Full Player ↗
+        </button>
+      </div>
+      <div class="ytm-connect-banner-btns">
+        <button type="button" id="ytmc-quick-phone-btn" class="ytm-handoff-btn phone">
+          📱 Listen on this Phone
+        </button>
+        <button type="button" id="ytmc-quick-desktop-btn" class="ytm-handoff-btn desktop">
+          💻 Listen on Desktop
+        </button>
+      </div>
+    </section>
+
+    <!-- Speed Dial Section -->
+    <section class="ytm-section" id="ytmc-section-speed-dial">
+      <div class="ytm-section-header">
+        <div>
+          <div class="ytm-section-eyebrow">LISTEN AGAIN</div>
+          <h2 class="ytm-section-title">Speed dial</h2>
+        </div>
+        <button type="button" class="ytm-section-more" id="ytmc-shuffle-all-btn">Shuffle play</button>
+      </div>
+      <div class="ytm-speed-dial-grid" id="ytmc-speed-dial-grid"></div>
+    </section>
+
+    <!-- Quick Picks Section -->
+    <section class="ytm-section" id="ytmc-section-quick-picks">
+      <div class="ytm-section-header">
+        <div>
+          <div class="ytm-section-eyebrow">START RADIO FROM A SONG</div>
+          <h2 class="ytm-section-title" id="ytmc-quick-picks-heading">Quick picks</h2>
+        </div>
+        <button type="button" class="ytm-section-more" id="ytmc-play-all-btn">Play all</button>
+      </div>
+      <div class="ytm-quick-picks-list" id="ytmc-quick-picks-list"></div>
+    </section>
+
+    <!-- Mixed For You Carousel -->
+    <section class="ytm-section" id="ytmc-section-mixes">
+      <div class="ytm-section-header">
+        <div>
+          <div class="ytm-section-eyebrow">MADE FOR YOU</div>
+          <h2 class="ytm-section-title">Mixed for you</h2>
+        </div>
+      </div>
+      <div class="ytm-carousel" id="ytmc-mixes-carousel"></div>
+    </section>
+  </div>
+
+  <!-- Full-Screen Expandable Now Playing View (Authentic YTM Mobile Player) -->
+  <div id="ytmc-now-playing-view" class="ytm-now-playing-sheet minimized">
+    <div class="ytm-np-inner">
+      <div class="ytm-np-top-bar">
+        <button type="button" id="ytmc-np-minimize-btn" class="ytm-icon-btn" title="Minimize Player">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+
+        <div class="ytm-song-video-toggle">
+          <button type="button" id="ytmc-mode-song-btn" class="ytm-sv-btn active">Song</button>
+          <button type="button" id="ytmc-mode-video-btn" class="ytm-sv-btn">Video</button>
+        </div>
+
+        <button type="button" id="ytmc-np-devices-btn" class="ytm-icon-btn" title="Switch Playback Device">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1ed760" stroke-width="2.2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Square Album Art + Embedded YouTube Player Stage -->
+      <div class="ytm-np-art-stage">
+        <img id="ytmc-stage-art" src="icons/icon-192.png" alt="Album Art" />
+        <div id="ytmc-yt-embed-wrap" style="position:absolute;inset:0;display:none;background:#000;"></div>
+      </div>
+
+      <!-- Song Title + Artist + Like -->
+      <div class="ytm-np-meta-row">
+        <div style="min-width:0;flex:1;">
+          <h2 id="ytmc-stage-title" class="ytm-np-title">Ready to Connect</h2>
+          <p id="ytmc-stage-artist" class="ytm-np-artist">Play any song below or on Desktop</p>
+        </div>
+        <button type="button" id="ytmc-like-btn" class="ytm-icon-btn" title="Like Song">👍</button>
+      </div>
+
+      <!-- Horizontal Action Pills -->
+      <div class="ytm-np-pills">
+        <button type="button" id="ytmc-pill-handoff-phone" class="ytm-action-pill active-green">📱 Play on Phone</button>
+        <button type="button" id="ytmc-pill-handoff-desktop" class="ytm-action-pill">💻 Play on Desktop</button>
+        <button type="button" id="ytmc-pill-open-devices" class="ytm-action-pill">🔀 Devices</button>
+        <button type="button" id="ytmc-pill-share" class="ytm-action-pill">↗ Share Track</button>
+      </div>
+
+      <!-- Interactive Progress Scrubber -->
+      <div class="ytm-np-scrubber">
+        <input type="range" id="ytmc-player-seek" class="ytm-np-range" min="0" max="210" value="0" step="1" />
+        <div class="ytm-np-times">
+          <span id="ytmc-player-cur">0:00</span>
+          <span id="ytmc-player-dur">3:30</span>
+        </div>
+      </div>
+
+      <!-- Main Transport Bar (Compatible with bridge.js ytmusic-player-bar selectors) -->
+      <ytmusic-player-bar class="ytm-np-controls">
+        <span class="title" id="ytmc-dom-title" style="display:none;"></span>
+        <span class="byline" id="ytmc-dom-artist" style="display:none;"></span>
+        <button type="button" id="ytmc-shuffle-btn" class="ytm-ctrl-aux" title="Shuffle">🔀</button>
+        <button type="button" class="previous-button ytm-ctrl-step" title="Previous">⏮</button>
+        <button type="button" id="play-pause-button" class="play-pause-button ytm-ctrl-play" title="Play / Pause">▶</button>
+        <button type="button" class="next-button ytm-ctrl-step" title="Next">⏭</button>
+        <button type="button" id="ytmc-repeat-btn" class="ytm-ctrl-aux" title="Repeat">🔁</button>
+      </ytmusic-player-bar>
+
+      <!-- Up Next / Lyrics / Related Tabs -->
+      <div class="ytm-np-drawer-tabs">
+        <button type="button" class="ytm-np-tab-btn active" data-np-tab="upnext">UP NEXT</button>
+        <button type="button" class="ytm-np-tab-btn" data-np-tab="lyrics">LYRICS</button>
+        <button type="button" class="ytm-np-tab-btn" data-np-tab="related">RELATED</button>
+      </div>
+      <div id="ytmc-np-drawer-body" class="ytm-np-drawer-body"></div>
+    </div>
+  </div>
+
+  <!-- Authentic YouTube Music Bottom Navigation Bar -->
+  <nav class="ytm-bottom-nav">
+    <button type="button" class="ytm-nav-item active" data-nav="home">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span>Home</span>
+    </button>
+    <button type="button" class="ytm-nav-item" data-nav="samples">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span>Samples</span>
+    </button>
+    <button type="button" class="ytm-nav-item" data-nav="explore">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+      <span>Explore</span>
+    </button>
+    <button type="button" class="ytm-nav-item" data-nav="library">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+      <span>Library</span>
+    </button>
+  </nav>
+
+  <script src="bridge.js"></script>
+  <script src="mobile-shell.js"></script>
+</body>
+</html>

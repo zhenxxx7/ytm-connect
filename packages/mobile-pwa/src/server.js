@@ -486,4 +486,19 @@ if (require.main === module) {
   });
 }
 
-module.exports = { createMobilePwaServer, injectBridgeIntoHtml };
+function vercelHandler(req, res) {
+  const indexHtmlPath = path.join(__dirname, '..', 'public', 'index.html');
+  if (fs.existsSync(indexHtmlPath)) {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(fs.readFileSync(indexHtmlPath, 'utf8'));
+    return;
+  }
+  const reqUrl = new URL(req.url || '/', 'https://ytm-connect.vercel.app');
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+  res.end(buildStandaloneProxiedDocument(reqUrl.search));
+}
+
+vercelHandler.createMobilePwaServer = createMobilePwaServer;
+vercelHandler.injectBridgeIntoHtml = injectBridgeIntoHtml;
+
+module.exports = vercelHandler;
