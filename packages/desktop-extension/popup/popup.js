@@ -27,12 +27,15 @@
     btnSaveUrls: document.getElementById('btn-save-urls')
   };
 
+  const DEFAULT_PWA_URL =
+    'https://raw.githack.com/zhenxxx7/ytm-connect/main/public/index.html';
+
   const state = {
     roomId: 'YTM123',
     pairToken: 'PAIR2026',
     deviceId: '',
     relayUrl: 'ws://localhost:8787',
-    pwaUrl: 'https://ytm-connect.vercel.app',
+    pwaUrl: DEFAULT_PWA_URL,
     connected: false,
     activeDeviceId: null,
     devices: [],
@@ -55,19 +58,26 @@
       pairToken: randomCode(8),
       deviceId: `desktop-${randomCode(8).toLowerCase()}`,
       relayUrl: 'ws://localhost:8787',
-      pwaUrl: 'https://ytm-connect.vercel.app'
+      pwaUrl: DEFAULT_PWA_URL
     };
 
     if (extApi && extApi.storage && extApi.storage.local) {
       const items = await new Promise((resolve) => {
         extApi.storage.local.get(Object.keys(defaults), (res) => resolve(res || {}));
       });
+      let savedPwa = items.pwaUrl || defaults.pwaUrl;
+      if (
+        savedPwa === 'https://ytm-connect.vercel.app' ||
+        savedPwa.includes('zhenxxx7.github.io')
+      ) {
+        savedPwa = DEFAULT_PWA_URL;
+      }
       const merged = {
         roomId: (items.roomId || defaults.roomId).toUpperCase(),
         pairToken: items.pairToken || defaults.pairToken,
         deviceId: items.deviceId || defaults.deviceId,
         relayUrl: items.relayUrl || defaults.relayUrl,
-        pwaUrl: items.pwaUrl || defaults.pwaUrl
+        pwaUrl: savedPwa
       };
       extApi.storage.local.set(merged);
       Object.assign(state, merged);
@@ -195,9 +205,7 @@
     ui.roomCode.textContent = state.roomId;
     const pairingUrl = getMobilePairingUrl();
     ui.openPwaLink.href = pairingUrl;
-    const rawBase = (
-      state.pwaUrl || 'https://ytm-connect.vercel.app'
-    ).replace(/\/+$/, '');
+    const rawBase = (state.pwaUrl || DEFAULT_PWA_URL).replace(/\/+$/, '');
     const sep = rawBase.endsWith('.html') ? '?' : '/?';
     const qrTargetUrl = `${rawBase}${sep}room=${encodeURIComponent(
       state.roomId

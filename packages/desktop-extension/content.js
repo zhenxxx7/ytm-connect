@@ -23,7 +23,7 @@
     deviceName: detectDesktopName(),
     deviceType: 'DESKTOP',
     relayUrl: 'ws://localhost:8787',
-    pwaUrl: 'https://ytm-connect.vercel.app',
+    pwaUrl: 'https://raw.githack.com/zhenxxx7/ytm-connect/main/public/index.html',
     connected: false,
     activeDeviceId: null,
     devices: [],
@@ -169,7 +169,7 @@
       deviceId: `desktop-${randomAlphanumeric(8).toLowerCase()}`,
       deviceName: detectDesktopName(),
       relayUrl: 'ws://localhost:8787',
-      pwaUrl: 'https://ytm-connect.vercel.app'
+      pwaUrl: 'https://raw.githack.com/zhenxxx7/ytm-connect/main/public/index.html'
     };
 
     try {
@@ -177,13 +177,20 @@
         const stored = await new Promise((resolve) => {
           extApi.storage.local.get(Object.keys(defaults), (items) => resolve(items || {}));
         });
+        let savedPwa = stored.pwaUrl || defaults.pwaUrl;
+        if (
+          savedPwa === 'https://ytm-connect.vercel.app' ||
+          savedPwa.includes('zhenxxx7.github.io')
+        ) {
+          savedPwa = defaults.pwaUrl;
+        }
         const merged = {
           roomId: (stored.roomId || defaults.roomId).toUpperCase(),
           pairToken: stored.pairToken || defaults.pairToken,
           deviceId: stored.deviceId || defaults.deviceId,
           deviceName: stored.deviceName || defaults.deviceName,
           relayUrl: stored.relayUrl || defaults.relayUrl,
-          pwaUrl: stored.pwaUrl || defaults.pwaUrl
+          pwaUrl: savedPwa
         };
         extApi.storage.local.set(merged);
         try {
