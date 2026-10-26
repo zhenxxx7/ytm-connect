@@ -32,7 +32,7 @@
     pairToken: 'PAIR2026',
     deviceId: '',
     relayUrl: 'ws://localhost:8787',
-    pwaUrl: 'https://zhenxxx7.github.io/ytm-connect',
+    pwaUrl: 'https://raw.githack.com/zhenxxx7/ytm-connect/main/docs/index.html',
     connected: false,
     activeDeviceId: null,
     devices: [],
@@ -55,7 +55,7 @@
       pairToken: randomCode(8),
       deviceId: `desktop-${randomCode(8).toLowerCase()}`,
       relayUrl: 'ws://localhost:8787',
-      pwaUrl: 'https://zhenxxx7.github.io/ytm-connect'
+      pwaUrl: 'https://raw.githack.com/zhenxxx7/ytm-connect/main/docs/index.html'
     };
 
     if (extApi && extApi.storage && extApi.storage.local) {
@@ -195,10 +195,13 @@
     ui.roomCode.textContent = state.roomId;
     const pairingUrl = getMobilePairingUrl();
     ui.openPwaLink.href = pairingUrl;
-    const qrTargetUrl = `${(state.pwaUrl || 'http://localhost:3000').replace(
-      /\/+$/,
-      ''
-    )}/?room=${encodeURIComponent(state.roomId)}&token=${encodeURIComponent(state.pairToken)}`;
+    const rawBase = (
+      state.pwaUrl || 'https://raw.githack.com/zhenxxx7/ytm-connect/main/docs/index.html'
+    ).replace(/\/+$/, '');
+    const sep = rawBase.endsWith('.html') ? '?' : '/?';
+    const qrTargetUrl = `${rawBase}${sep}room=${encodeURIComponent(
+      state.roomId
+    )}&token=${encodeURIComponent(state.pairToken)}`;
 
     try {
       ui.qrContainer.innerHTML = window.YtmConnectQR.renderQrSvg(qrTargetUrl, {

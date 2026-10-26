@@ -23,7 +23,7 @@
     deviceName: detectDesktopName(),
     deviceType: 'DESKTOP',
     relayUrl: 'ws://localhost:8787',
-    pwaUrl: 'https://zhenxxx7.github.io/ytm-connect',
+    pwaUrl: 'https://raw.githack.com/zhenxxx7/ytm-connect/main/docs/index.html',
     connected: false,
     activeDeviceId: null,
     devices: [],
@@ -169,7 +169,7 @@
       deviceId: `desktop-${randomAlphanumeric(8).toLowerCase()}`,
       deviceName: detectDesktopName(),
       relayUrl: 'ws://localhost:8787',
-      pwaUrl: 'https://zhenxxx7.github.io/ytm-connect'
+      pwaUrl: 'https://raw.githack.com/zhenxxx7/ytm-connect/main/docs/index.html'
     };
 
     try {
@@ -1075,7 +1075,9 @@
       });
       return;
     }
-    const fallbackUrl = `${state.pwaUrl.replace(/\/+$/, '')}/?room=${encodeURIComponent(
+    const rawBase = state.pwaUrl.replace(/\/+$/, '');
+    const sep = rawBase.endsWith('.html') ? '?' : '/?';
+    const fallbackUrl = `${rawBase}${sep}room=${encodeURIComponent(
       state.roomId
     )}&token=${encodeURIComponent(state.pairToken)}`;
     window.open(fallbackUrl, 'ytmc_mobile', 'width=410,height=820');
