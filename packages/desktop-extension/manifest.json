@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "YTM-Connect for YouTube Music",
   "short_name": "YTM-Connect",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Real-time multi-device remote control and seamless playback handoff for YouTube Music between Desktop and Mobile.",
   "permissions": [
     "storage",
@@ -11,8 +11,8 @@
   "host_permissions": [
     "https://music.youtube.com/*",
     "wss://broker.emqx.io/*",
-    "http://localhost:*/*",
-    "http://127.0.0.1:*/*"
+    "http://localhost/*",
+    "http://127.0.0.1/*"
   ],
   "background": {
     "service_worker": "background.js",
@@ -61,7 +61,12 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "ytm-connect@ytmconnect.local",
-      "strict_min_version": "109.0"
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
     }
   }
 }

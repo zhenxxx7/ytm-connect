@@ -204,11 +204,15 @@
     )}&token=${encodeURIComponent(state.pairToken)}`;
 
     try {
-      ui.qrContainer.innerHTML = window.YtmConnectQR.renderQrSvg(qrTargetUrl, {
+      const svgMarkup = window.YtmConnectQR.renderQrSvg(qrTargetUrl, {
         margin: 2,
         foreground: '#08120c',
         background: '#ffffff'
       });
+      const svgDoc = new DOMParser().parseFromString(svgMarkup, 'image/svg+xml');
+      if (svgDoc && svgDoc.documentElement) {
+        ui.qrContainer.replaceChildren(document.importNode(svgDoc.documentElement, true));
+      }
     } catch (err) {
       ui.qrContainer.textContent = state.roomId;
     }
@@ -222,30 +226,45 @@
 
     // Devices list
     ui.devicesCount.textContent = String(state.devices.length);
+    ui.devicesList.replaceChildren();
     if (state.devices.length === 0) {
-      ui.devicesList.innerHTML = `<div class="empty-state">Open <strong>music.youtube.com</strong> or scan the QR code on Mobile to connect devices.</div>`;
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent =
+        'Open music.youtube.com or scan the QR code on Mobile to connect devices.';
+      ui.devicesList.appendChild(empty);
     } else {
-      ui.devicesList.innerHTML = state.devices
-        .map((dev) => {
-          const isActive = dev.deviceId === state.activeDeviceId;
-          const isSelf = dev.deviceId === state.deviceId;
-          return `
-            <div class="device-row ${isActive ? 'active' : ''}" data-device-id="${escapeHtml(dev.deviceId)}">
-              <div class="device-row-left">
-                <div class="device-row-name">
-                  ${escapeHtml(dev.deviceName)}${isSelf ? ' (Desktop)' : ''}
-                </div>
-                <div class="device-row-meta">
-                  ${dev.deviceType} • ${isActive ? 'Active Audio Output' : 'Available for Handoff'}
-                </div>
-              </div>
-              <span class="device-action-pill">
-                ${isActive ? 'Playing' : 'Transfer'}
-              </span>
-            </div>
-          `;
-        })
-        .join('');
+      state.devices.forEach((dev) => {
+        const isActive = dev.deviceId === state.activeDeviceId;
+        const isSelf = dev.deviceId === state.deviceId;
+        const row = document.createElement('div');
+        row.className = `device-row ${isActive ? 'active' : ''}`;
+        row.setAttribute('data-device-id', dev.deviceId);
+
+        const left = document.createElement('div');
+        left.className = 'device-row-left';
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'device-row-name';
+        nameEl.textContent = `${dev.deviceName}${isSelf ? ' (Desktop)' : ''}`;
+
+        const metaEl = document.createElement('div');
+        metaEl.className = 'device-row-meta';
+        metaEl.textContent = `${dev.deviceType} • ${
+          isActive ? 'Active Audio Output' : 'Available for Handoff'
+        }`;
+
+        left.appendChild(nameEl);
+        left.appendChild(metaEl);
+
+        const pill = document.createElement('span');
+        pill.className = 'device-action-pill';
+        pill.textContent = isActive ? 'Playing' : 'Transfer';
+
+        row.appendChild(left);
+        row.appendChild(pill);
+        ui.devicesList.appendChild(row);
+      });
 
       ui.devicesList.querySelectorAll('.device-row').forEach((row) => {
         row.addEventListener('click', async () => {

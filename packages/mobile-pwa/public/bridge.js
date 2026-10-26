@@ -68,6 +68,7 @@
   function setSafeHtml(el, htmlStr) {
     if (!el) return;
     try {
+      let input = String(htmlStr || '');
       if (window.trustedTypes) {
         if (!ttPolicy && window.trustedTypes.createPolicy) {
           for (const name of ['ytm-connect', 'default', 'polymer-html-literal']) {
@@ -79,11 +80,14 @@
         }
         const policy = ttPolicy || window.trustedTypes.defaultPolicy;
         if (policy && typeof policy.createHTML === 'function') {
-          el.innerHTML = policy.createHTML(htmlStr);
-          return;
+          input = policy.createHTML(input);
         }
       }
-      el.innerHTML = htmlStr;
+      const parsed = new DOMParser().parseFromString(input, 'text/html');
+      if (parsed && parsed.body) {
+        const nodes = Array.from(parsed.body.childNodes).map((n) => document.importNode(n, true));
+        el.replaceChildren(...nodes);
+      }
     } catch {}
   }
 

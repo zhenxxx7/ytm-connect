@@ -55,7 +55,14 @@ function createPosixZip(sourceDir, outZipPath) {
   let offset = 0;
 
   for (const file of files) {
-    const rawData = fs.readFileSync(file.fullPath);
+    let rawData = fs.readFileSync(file.fullPath);
+    if (file.relPath === 'manifest.json') {
+      const firefoxManifest = JSON.parse(rawData.toString('utf8'));
+      if (firefoxManifest.background && firefoxManifest.background.scripts) {
+        delete firefoxManifest.background.service_worker;
+      }
+      rawData = Buffer.from(JSON.stringify(firefoxManifest, null, 2), 'utf8');
+    }
     const compressed = zlib.deflateRawSync(rawData);
     const crc = crc32(rawData);
     const nameBytes = Buffer.from(file.relPath, 'utf8');
