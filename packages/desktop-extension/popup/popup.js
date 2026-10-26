@@ -27,8 +27,7 @@
     btnSaveUrls: document.getElementById('btn-save-urls')
   };
 
-  const DEFAULT_PWA_URL =
-    'https://raw.githack.com/zhenxxx7/ytm-connect/main/public/index.html';
+  const DEFAULT_PWA_URL = 'https://ytm-connect.vercel.app';
 
   const state = {
     roomId: 'YTM123',
@@ -67,7 +66,7 @@
       });
       let savedPwa = items.pwaUrl || defaults.pwaUrl;
       if (
-        savedPwa === 'https://ytm-connect.vercel.app' ||
+        savedPwa.includes('raw.githack.com') ||
         savedPwa.includes('zhenxxx7.github.io')
       ) {
         savedPwa = DEFAULT_PWA_URL;

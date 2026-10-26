@@ -23,7 +23,7 @@
     deviceName: detectDesktopName(),
     deviceType: 'DESKTOP',
     relayUrl: 'ws://localhost:8787',
-    pwaUrl: 'https://raw.githack.com/zhenxxx7/ytm-connect/main/public/index.html',
+    pwaUrl: 'https://ytm-connect.vercel.app',
     connected: false,
     activeDeviceId: null,
     devices: [],
@@ -169,7 +169,7 @@
       deviceId: `desktop-${randomAlphanumeric(8).toLowerCase()}`,
       deviceName: detectDesktopName(),
       relayUrl: 'ws://localhost:8787',
-      pwaUrl: 'https://raw.githack.com/zhenxxx7/ytm-connect/main/public/index.html'
+      pwaUrl: 'https://ytm-connect.vercel.app'
     };
 
     try {
@@ -179,7 +179,7 @@
         });
         let savedPwa = stored.pwaUrl || defaults.pwaUrl;
         if (
-          savedPwa === 'https://ytm-connect.vercel.app' ||
+          savedPwa.includes('raw.githack.com') ||
           savedPwa.includes('zhenxxx7.github.io')
         ) {
           savedPwa = defaults.pwaUrl;

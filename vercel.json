@@ -1,4 +1,5 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "public"
+  "installCommand": "echo skip",
+  "buildCommand": "echo ok",
+  "outputDirectory": "docs"
 }
