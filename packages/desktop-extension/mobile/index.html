@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#090a0d" />
+  <title>YTM-Connect Mobile Controller</title>
+  <link rel="stylesheet" href="overlay.css" />
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 12%, rgba(255, 0, 51, 0.16), transparent 55%), #090a0d;
+      color: #f5f7fa;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .shell-wrap {
+      padding: 16px 16px 150px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="ytmc-mobile-app-shell" class="shell-wrap">
+    <header style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:34px;height:34px;border-radius:50%;background:#ff0033;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(255,0,51,0.4);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><polygon points="9,7 18,12 9,17"/></svg>
+        </div>
+        <div>
+          <div style="font-size:17px;font-weight:800;letter-spacing:-0.02em;">Music</div>
+          <div style="font-size:11px;color:#9aa2b1;">YTM-Connect Serverless Mobile</div>
+        </div>
+      </div>
+      <button id="ytmc-header-connect-btn" type="button" style="padding:7px 13px;border-radius:999px;border:1px solid rgba(30,215,96,0.45);background:rgba(30,215,96,0.14);color:#1ed760;font-size:12px;font-weight:700;cursor:pointer;">
+        Devices / Switch Play
+      </button>
+    </header>
+
+    <main style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:22px;padding:20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+      <div id="ytmc-stage-mode-pill" style="padding:5px 12px;border-radius:999px;background:rgba(30,215,96,0.15);color:#1ed760;font-size:11.5px;font-weight:700;">
+        Connecting to Desktop YouTube Music...
+      </div>
+
+      <div style="position:relative;width:min(230px,65vw);height:min(230px,65vw);border-radius:18px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,0.65);background:#151821;">
+        <img id="ytmc-stage-art" src="../icons/icon-128.png" alt="Album Art" style="width:100%;height:100%;object-fit:cover;" />
+        <div id="ytmc-yt-embed-wrap" style="position:absolute;inset:0;display:none;background:#000;"></div>
+      </div>
+
+      <div style="max-width:100%;">
+        <h2 id="ytmc-stage-title" style="margin:0;font-size:19px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Ready to Connect</h2>
+        <p id="ytmc-stage-artist" style="margin:4px 0 0;font-size:13px;color:#9aa2b1;">Play a song on music.youtube.com</p>
+      </div>
+
+      <ytmusic-player-bar style="display:flex;align-items:center;justify-content:center;gap:20px;width:100%;margin-top:4px;">
+        <span class="title" id="ytmc-dom-title" style="display:none;"></span>
+        <span class="byline" id="ytmc-dom-artist" style="display:none;"></span>
+        <button type="button" class="previous-button" style="width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#fff;font-size:17px;cursor:pointer;">⏮</button>
+        <button type="button" id="play-pause-button" class="play-pause-button" style="width:60px;height:60px;border-radius:50%;border:none;background:#ff0033;color:#fff;font-size:22px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(255,0,51,0.45);">▶</button>
+        <button type="button" class="next-button" style="width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#fff;font-size:17px;cursor:pointer;">⏭</button>
+      </ytmusic-player-bar>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:6px;">
+        <button type="button" id="ytmc-quick-phone-btn" style="padding:11px 12px;border-radius:12px;border:1px solid rgba(30,215,96,0.4);background:rgba(30,215,96,0.16);color:#1ed760;font-size:12.5px;font-weight:700;cursor:pointer;">
+          📱 Listen on this Phone
+        </button>
+        <button type="button" id="ytmc-quick-desktop-btn" style="padding:11px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.07);color:#f5f7fa;font-size:12.5px;font-weight:700;cursor:pointer;">
+          💻 Listen on Desktop
+        </button>
+      </div>
+    </main>
+
+    <nav style="position:fixed;left:0;right:0;bottom:0;height:56px;background:rgba(12,14,18,0.96);border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-around;font-size:11px;color:#9aa2b1;z-index:2147483630;">
+      <span style="color:#fff;font-weight:700;">Home</span>
+      <span>Samples</span>
+      <span>Explore</span>
+      <span>Library</span>
+    </nav>
+  </div>
+
+  <script src="bridge.js"></script>
+  <script src="mobile-shell.js"></script>
+</body>
+</html>

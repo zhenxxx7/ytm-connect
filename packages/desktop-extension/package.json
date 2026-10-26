@@ -1,0 +1,6 @@
+{
+  "name": "@ytm-connect/desktop-extension",
+  "version": "1.0.0",
+  "description": "Cross-browser Manifest V3 Extension for YTM-Connect (Chrome, Edge, Firefox)",
+  "private": true
+}

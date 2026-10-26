@@ -1,0 +1,67 @@
+{
+  "manifest_version": 3,
+  "name": "YTM-Connect — Spotify Connect for YouTube Music",
+  "short_name": "YTM-Connect",
+  "version": "1.0.0",
+  "description": "Real-time multi-device remote control and seamless playback handoff for YouTube Music between Desktop and Mobile.",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://music.youtube.com/*",
+    "wss://broker.emqx.io/*",
+    "http://localhost:*/*",
+    "http://127.0.0.1:*/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "YTM-Connect Devices & Pairing",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://music.youtube.com/*"
+      ],
+      "css": [
+        "overlay.css"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "page-bridge.js"
+      ],
+      "matches": [
+        "https://music.youtube.com/*"
+      ]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "ytm-connect@ytmconnect.local",
+      "strict_min_version": "109.0"
+    }
+  }
+}

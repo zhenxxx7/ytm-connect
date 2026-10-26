@@ -1,0 +1,348 @@
+/* YTM-Connect — Desktop In-Page Overlay Styles (Spotify Connect x YouTube Music Dark Studio) */
+
+:root {
+  --ytmc-bg-elevated: rgba(18, 20, 24, 0.94);
+  --ytmc-bg-card: rgba(255, 255, 255, 0.05);
+  --ytmc-bg-card-hover: rgba(255, 255, 255, 0.09);
+  --ytmc-border: rgba(255, 255, 255, 0.11);
+  --ytmc-accent: #1ed760;
+  --ytmc-accent-soft: rgba(30, 215, 96, 0.16);
+  --ytmc-ytm-red: #ff0033;
+  --ytmc-text-primary: #f5f7fa;
+  --ytmc-text-secondary: #9aa0a6;
+  --ytmc-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* Player Bar Injected Trigger Button */
+.ytmc-playerbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 12px;
+  margin: 0 6px;
+  border-radius: 999px;
+  border: 1px solid var(--ytmc-border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ytmc-text-primary);
+  font-family: "YouTube Sans", "Roboto", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  position: relative;
+  z-index: 1001;
+}
+
+.ytmc-playerbar-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.24);
+  transform: translateY(-1px);
+}
+
+.ytmc-playerbar-btn.is-connected {
+  border-color: rgba(30, 215, 96, 0.45);
+  background: rgba(30, 215, 96, 0.11);
+  color: var(--ytmc-accent);
+}
+
+.ytmc-playerbar-btn.is-remote-active {
+  border-color: var(--ytmc-accent);
+  background: rgba(30, 215, 96, 0.2);
+  color: #ffffff;
+  box-shadow: 0 0 18px rgba(30, 215, 96, 0.25);
+}
+
+.ytmc-playerbar-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.ytmc-badge-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--ytmc-accent);
+  color: #07130b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Fallback Floating Trigger if player bar is hidden */
+.ytmc-floating-anchor {
+  position: fixed;
+  right: 24px;
+  bottom: 92px;
+  z-index: 9998;
+}
+
+/* Spotify Connect Remote Banner on Desktop when Mobile is Active */
+.ytmc-remote-banner {
+  position: fixed;
+  left: 50%;
+  bottom: 76px;
+  transform: translateX(-50%);
+  z-index: 9997;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(16, 118, 52, 0.96), rgba(24, 168, 75, 0.96));
+  color: #ffffff;
+  font-family: "YouTube Sans", "Roboto", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+}
+
+.ytmc-remote-banner[hidden] {
+  display: none !important;
+}
+
+.ytmc-remote-banner-btn {
+  border: none;
+  background: rgba(0, 0, 0, 0.32);
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 11px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.ytmc-remote-banner-btn:hover {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* Device Switcher Popover */
+.ytmc-popover {
+  position: fixed;
+  right: 20px;
+  bottom: 88px;
+  width: 340px;
+  border-radius: 18px;
+  background: var(--ytmc-bg-elevated);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  box-shadow: var(--ytmc-shadow);
+  color: var(--ytmc-text-primary);
+  font-family: "YouTube Sans", "Roboto", -apple-system, BlinkMacSystemFont, sans-serif;
+  z-index: 10000;
+  overflow: hidden;
+  transform-origin: bottom right;
+  animation: ytmcPopoverIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ytmc-popover[hidden] {
+  display: none !important;
+}
+
+@keyframes ytmcPopoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ytmc-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--ytmc-border);
+}
+
+.ytmc-popover-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.ytmc-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f59e0b;
+}
+
+.ytmc-status-dot.online {
+  background: var(--ytmc-accent);
+  box-shadow: 0 0 10px var(--ytmc-accent);
+}
+
+.ytmc-room-pill {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ytmc-text-secondary);
+  letter-spacing: 0.08em;
+}
+
+.ytmc-device-list {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.ytmc-device-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: var(--ytmc-bg-card);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.ytmc-device-item:hover {
+  background: var(--ytmc-bg-card-hover);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.ytmc-device-item.is-active {
+  background: var(--ytmc-accent-soft);
+  border-color: rgba(30, 215, 96, 0.36);
+}
+
+.ytmc-device-left {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.ytmc-device-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ytmc-text-primary);
+  flex-shrink: 0;
+}
+
+.ytmc-device-item.is-active .ytmc-device-icon {
+  background: var(--ytmc-accent);
+  color: #06140a;
+}
+
+.ytmc-device-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ytmc-device-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ytmc-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ytmc-device-item.is-active .ytmc-device-name {
+  color: var(--ytmc-accent);
+}
+
+.ytmc-device-sub {
+  font-size: 11px;
+  color: var(--ytmc-text-secondary);
+  margin-top: 2px;
+}
+
+.ytmc-transfer-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ytmc-text-primary);
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.ytmc-device-item:hover .ytmc-transfer-tag {
+  background: var(--ytmc-accent);
+  color: #05140a;
+}
+
+/* Equalizer bars for active device */
+.ytmc-eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+
+.ytmc-eq span {
+  width: 3px;
+  background: var(--ytmc-accent);
+  border-radius: 2px;
+  animation: ytmcEqBounce 0.8s infinite ease-in-out alternate;
+}
+
+.ytmc-eq span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.ytmc-eq span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes ytmcEqBounce {
+  0% {
+    height: 4px;
+  }
+  100% {
+    height: 14px;
+  }
+}
+
+.ytmc-popover-footer {
+  padding: 11px 16px 14px;
+  border-top: 1px solid var(--ytmc-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: var(--ytmc-text-secondary);
+}
+
+.ytmc-pair-link {
+  color: var(--ytmc-accent);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ytmc-pair-link:hover {
+  text-decoration: underline;
+}

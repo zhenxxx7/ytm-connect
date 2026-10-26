@@ -1,0 +1,19 @@
+{
+  "name": "ytm-connect",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Spotify Connect for YouTube Music — Real-time multi-device remote control and playback handoff system",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "dev:relay": "npm --workspace=packages/relay-server run dev",
+    "dev:pwa": "npm --workspace=packages/mobile-pwa run dev",
+    "start": "node scripts/dev.js",
+    "test": "node scripts/test-e2e.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

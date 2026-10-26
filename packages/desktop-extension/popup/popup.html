@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YTM-Connect</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Header -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="9"></circle>
+            <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"></polygon>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">YTM-Connect</h1>
+          <p class="brand-sub">Spotify Connect for YouTube Music</p>
+        </div>
+      </div>
+      <div id="connection-badge" class="conn-badge offline">
+        <span class="conn-dot"></span>
+        <span id="connection-text">Connecting</span>
+      </div>
+    </header>
+
+    <!-- Room & QR Pairing Card -->
+    <section class="qr-card">
+      <div class="qr-left">
+        <div id="qr-container" class="qr-box" aria-label="Mobile Pairing QR Code"></div>
+      </div>
+      <div class="qr-right">
+        <div class="room-label">ROOM PAIRING CODE</div>
+        <div class="room-code-row">
+          <span id="room-code-display" class="room-code">------</span>
+          <button id="copy-room-btn" class="icon-btn" title="Copy Room Code" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+          <button id="regen-room-btn" class="icon-btn" title="Generate New Room" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+          </button>
+        </div>
+        <p class="qr-help">
+          Scan with your phone camera or open the Mobile PWA URL to control &amp; handoff playback.
+        </p>
+        <div class="qr-actions">
+          <button id="copy-url-btn" class="btn-secondary" type="button">Copy Link</button>
+          <a id="open-pwa-link" class="btn-primary" href="http://localhost:3000" target="_blank" rel="noopener">
+            Open PWA ↗
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Now Playing Mini Bar -->
+    <section id="now-playing-card" class="now-playing">
+      <div class="np-info">
+        <div id="np-title" class="np-title">No active track detected</div>
+        <div id="np-artist" class="np-artist">Open music.youtube.com to start</div>
+      </div>
+      <div class="np-controls">
+        <button id="ctrl-prev" class="ctrl-btn" title="Previous" type="button">⏮</button>
+        <button id="ctrl-toggle" class="ctrl-btn primary" title="Play / Pause" type="button">▶</button>
+        <button id="ctrl-next" class="ctrl-btn" title="Next" type="button">⏭</button>
+      </div>
+    </section>
+
+    <!-- Connected Devices in Room -->
+    <section class="devices-section">
+      <div class="section-header">
+        <span>CONNECTED DEVICES</span>
+        <span id="devices-count" class="count-pill">0</span>
+      </div>
+      <div id="devices-list" class="devices-list">
+        <div class="empty-state">Waiting for devices...</div>
+      </div>
+    </section>
+
+    <!-- Network / Endpoint Settings -->
+    <details class="settings-drawer">
+      <summary>Network &amp; Manual Room Settings</summary>
+      <div class="settings-body">
+        <label class="field">
+          <span>Join Specific Room Code (6 chars)</span>
+          <div class="field-inline">
+            <input id="input-room" type="text" maxlength="12" placeholder="ABC123" />
+            <button id="btn-join-room" class="btn-secondary" type="button">Join</button>
+          </div>
+        </label>
+        <label class="field">
+          <span>Relay WebSocket Server</span>
+          <input id="input-relay-url" type="text" placeholder="ws://localhost:8787" />
+        </label>
+        <label class="field">
+          <span>Mobile PWA Base URL (LAN IP for QR)</span>
+          <input id="input-pwa-url" type="text" placeholder="http://192.168.1.x:3000" />
+        </label>
+        <button id="btn-save-urls" class="btn-primary full-width" type="button">
+          Save Network Endpoints
+        </button>
+      </div>
+    </details>
+  </div>
+
+  <script src="qrcode.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

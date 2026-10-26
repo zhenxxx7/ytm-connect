@@ -1,0 +1,13 @@
+{
+  "name": "@ytm-connect/relay-server",
+  "version": "1.0.0",
+  "description": "Real-time WebSocket signaling and room broker for YTM-Connect",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
