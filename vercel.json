@@ -1,5 +1,4 @@
 {
-  "buildCommand": "",
-  "outputDirectory": "docs",
-  "framework": null
+  "buildCommand": "npm run build",
+  "outputDirectory": "public"
 }

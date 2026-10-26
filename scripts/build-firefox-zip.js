@@ -141,60 +141,71 @@ function buildAll() {
     path.join(extDir, 'mobile', 'overlay.css')
   );
 
-  // 2. Build /docs for GitHub Pages (https://zhenxxx7.github.io/ytm-connect/)
-  fs.mkdirSync(path.join(docsDir, 'icons'), { recursive: true });
-  fs.copyFileSync(path.join(extDir, 'mobile', 'bridge.js'), path.join(docsDir, 'bridge.js'));
-  fs.copyFileSync(path.join(extDir, 'mobile', 'overlay.css'), path.join(docsDir, 'overlay.css'));
-  fs.copyFileSync(
-    path.join(extDir, 'mobile', 'mobile-shell.js'),
-    path.join(docsDir, 'mobile-shell.js')
-  );
-
-  // Adjust icon path for docs/index.html + include manifest.json
-  const mobileHtml = fs
-    .readFileSync(path.join(extDir, 'mobile', 'index.html'), 'utf8')
-    .replace('../icons/icon-128.png', 'icons/icon-192.png')
-    .replace(
-      '<link rel="stylesheet" href="overlay.css" />',
-      '<link rel="manifest" href="manifest.json" />\n  <link rel="apple-touch-icon" href="icons/icon-192.png" />\n  <link rel="stylesheet" href="overlay.css" />'
+  // 2. Build /docs and /public for Vercel & GitHub Pages
+  const publicDir = path.join(rootDir, 'public');
+  for (const targetStaticDir of [docsDir, publicDir]) {
+    fs.mkdirSync(path.join(targetStaticDir, 'icons'), { recursive: true });
+    fs.copyFileSync(
+      path.join(extDir, 'mobile', 'bridge.js'),
+      path.join(targetStaticDir, 'bridge.js')
     );
-  fs.writeFileSync(path.join(docsDir, 'index.html'), mobileHtml);
+    fs.copyFileSync(
+      path.join(extDir, 'mobile', 'overlay.css'),
+      path.join(targetStaticDir, 'overlay.css')
+    );
+    fs.copyFileSync(
+      path.join(extDir, 'mobile', 'mobile-shell.js'),
+      path.join(targetStaticDir, 'mobile-shell.js')
+    );
 
-  const docsManifest = {
-    name: 'YTM-Connect Mobile',
-    short_name: 'YTM-Connect',
-    description: 'Spotify Connect for YouTube Music — Serverless Mobile Controller PWA',
-    start_url: './',
-    scope: './',
-    display: 'standalone',
-    orientation: 'portrait',
-    background_color: '#090a0d',
-    theme_color: '#090a0d',
-    icons: [
-      {
-        src: 'icons/icon-192.png',
-        sizes: '192x192',
-        type: 'image/png',
-        purpose: 'any maskable'
-      },
-      {
-        src: 'icons/icon-512.png',
-        sizes: '512x512',
-        type: 'image/png',
-        purpose: 'any maskable'
-      }
-    ]
-  };
-  fs.writeFileSync(path.join(docsDir, 'manifest.json'), JSON.stringify(docsManifest, null, 2));
-  fs.copyFileSync(
-    path.join(pwaPublicDir, 'icons', 'icon-192.png'),
-    path.join(docsDir, 'icons', 'icon-192.png')
-  );
-  fs.copyFileSync(
-    path.join(pwaPublicDir, 'icons', 'icon-512.png'),
-    path.join(docsDir, 'icons', 'icon-512.png')
-  );
-  fs.writeFileSync(path.join(docsDir, '.nojekyll'), '');
+    const mobileHtml = fs
+      .readFileSync(path.join(extDir, 'mobile', 'index.html'), 'utf8')
+      .replace('../icons/icon-128.png', 'icons/icon-192.png')
+      .replace(
+        '<link rel="stylesheet" href="overlay.css" />',
+        '<link rel="manifest" href="manifest.json" />\n  <link rel="apple-touch-icon" href="icons/icon-192.png" />\n  <link rel="stylesheet" href="overlay.css" />'
+      );
+    fs.writeFileSync(path.join(targetStaticDir, 'index.html'), mobileHtml);
+
+    const docsManifest = {
+      name: 'YTM-Connect Mobile',
+      short_name: 'YTM-Connect',
+      description: 'Spotify Connect for YouTube Music — Serverless Mobile Controller PWA',
+      start_url: './',
+      scope: './',
+      display: 'standalone',
+      orientation: 'portrait',
+      background_color: '#030303',
+      theme_color: '#030303',
+      icons: [
+        {
+          src: 'icons/icon-192.png',
+          sizes: '192x192',
+          type: 'image/png',
+          purpose: 'any maskable'
+        },
+        {
+          src: 'icons/icon-512.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'any maskable'
+        }
+      ]
+    };
+    fs.writeFileSync(
+      path.join(targetStaticDir, 'manifest.json'),
+      JSON.stringify(docsManifest, null, 2)
+    );
+    fs.copyFileSync(
+      path.join(pwaPublicDir, 'icons', 'icon-192.png'),
+      path.join(targetStaticDir, 'icons', 'icon-192.png')
+    );
+    fs.copyFileSync(
+      path.join(pwaPublicDir, 'icons', 'icon-512.png'),
+      path.join(targetStaticDir, 'icons', 'icon-512.png')
+    );
+    fs.writeFileSync(path.join(targetStaticDir, '.nojekyll'), '');
+  }
 
   // 3. Build POSIX-compliant ytm-connect-firefox.zip
   const zipPath = path.join(rootDir, 'ytm-connect-firefox.zip');
