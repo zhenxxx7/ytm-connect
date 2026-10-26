@@ -709,4 +709,30 @@ if (require.main === module) {
   });
 }
 
-module.exports = { createRelayServer, getPrimaryLanIp, normalizeRoomId };
+function vercelRootHandler(req, res) {
+  const fs = require('fs');
+  const path = require('path');
+  const candidates = [
+    path.join(__dirname, '..', '..', '..', 'public', 'index.html'),
+    path.join(__dirname, '..', '..', '..', 'docs', 'index.html'),
+    path.join(__dirname, '..', '..', 'mobile-pwa', 'public', 'index.html')
+  ];
+  for (const p of candidates) {
+    try {
+      if (fs.existsSync(p)) {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(fs.readFileSync(p, 'utf8'));
+        return;
+      }
+    } catch {}
+  }
+  const qs = req.url && req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+  res.writeHead(302, { Location: `/index.html${qs}` });
+  res.end();
+}
+
+vercelRootHandler.createRelayServer = createRelayServer;
+vercelRootHandler.getPrimaryLanIp = getPrimaryLanIp;
+vercelRootHandler.normalizeRoomId = normalizeRoomId;
+
+module.exports = vercelRootHandler;
